@@ -1,0 +1,66 @@
+services:
+  opencode-serve:
+    build:
+      context: .
+      dockerfile: serve.dockerfile
+    ports:
+      - "4096:4096"
+    environment:
+      - OPENCODE_SERVER_PASSWORD=changeme
+    volumes:
+      - opencode-data:/root/.local/share/opencode
+      - opencode-config:/root/.config/opencode
+
+  opencode-web:
+    build:
+      context: .
+      dockerfile: web.dockerfile
+    ports:
+      - "4098:4098"
+    environment:
+      - OPENCODE_SERVER_PASSWORD=changeme
+    volumes:
+      - opencode-data:/root/.local/share/opencode
+      - opencode-config:/root/.config/opencode
+
+  opencode-acp:
+    build:
+      context: .
+      dockerfile: acp.dockerfile
+    ports:
+      - "4097:4097"
+
+  opencode-issue-processor:
+    build:
+      context: .
+      dockerfile: issue-processor.dockerfile
+    environment:
+      - GH_TOKEN
+      - OPENCODE_PROVIDER
+      - OPENCODE_MODEL
+      - OPENCODE_API_KEY
+    volumes:
+      - opencode-data:/root/.local/share/opencode
+      - opencode-config:/root/.config/opencode
+    profiles:
+      - manual
+
+  opencode-plan-issue:
+    build:
+      context: .
+      dockerfile: plan-issue.dockerfile
+    environment:
+      - GH_TOKEN
+      - ISSUE_URL
+      - OPENCODE_PROVIDER
+      - OPENCODE_MODEL
+      - OPENCODE_API_KEY
+    volumes:
+      - opencode-data:/root/.local/share/opencode
+      - opencode-config:/root/.config/opencode
+    profiles:
+      - manual
+
+volumes:
+  opencode-data:
+  opencode-config:

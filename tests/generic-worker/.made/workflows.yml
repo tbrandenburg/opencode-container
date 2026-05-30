@@ -1,0 +1,33 @@
+workflows:
+  - id: wf_agent_test
+    name: Agent Test
+    steps:
+      - type: bash
+        name: Run test agent
+        run: |
+          opencode run --agent test 'What is your name?'
+
+  - id: wf_repo_inspect
+    name: Repo Inspect
+    steps:
+      - type: bash
+        name: Git log
+        run: |
+          echo "=== Recent commits ==="
+          git log --oneline -5 2>/dev/null || echo "No git history"
+      - type: bash
+        name: Project stats
+        run: |
+          echo "=== File count ==="
+          find . -type f -not -path './.git/*' 2>/dev/null | wc -l
+          echo "=== Top-level ==="
+          ls -la
+      - type: bash
+        name: Check README
+        run: |
+          if [ -f README.md ]; then
+            echo "=== README ==="
+            head -5 README.md
+          else
+            echo "No README.md found"
+          fi

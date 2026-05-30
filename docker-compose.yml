@@ -36,9 +36,6 @@ services:
       dockerfile: issue-processor.dockerfile
     environment:
       - GH_TOKEN
-      - OPENCODE_PROVIDER
-      - OPENCODE_MODEL
-      - OPENCODE_API_KEY
     volumes:
       - opencode-data:/root/.local/share/opencode
       - opencode-config:/root/.config/opencode
@@ -52,9 +49,20 @@ services:
     environment:
       - GH_TOKEN
       - ISSUE_URL
-      - OPENCODE_PROVIDER
-      - OPENCODE_MODEL
-      - OPENCODE_API_KEY
+    volumes:
+      - opencode-data:/root/.local/share/opencode
+      - opencode-config:/root/.config/opencode
+    profiles:
+      - manual
+
+  opencode-generic-worker:
+    build:
+      context: .
+      dockerfile: generic-worker.dockerfile
+    environment:
+      - REPO_URL
+      - ISSUE
+      - GH_TOKEN
     volumes:
       - opencode-data:/root/.local/share/opencode
       - opencode-config:/root/.config/opencode

@@ -11,6 +11,7 @@ Docker images for running OpenCode in various serving modes.
 | `opencode-acp` | `acp` | ACP (Agent Client Protocol) JSON-RPC server over stdio, bridged to TCP via socat |
 | `opencode-issue-processor` | `run` | Batch: iterate all open issues from configured repos, piped into `opencode run` |
 | `opencode-plan-issue` | `run` | One-shot: clone a repo, analyze an issue, post implementation plan as comment |
+| `opencode-generic-worker` | `run` | Clone a repo, bootstrap opencode config, execute a mounted script or inline command |
 
 ## Commands
 
@@ -26,6 +27,7 @@ make logs       # docker compose logs -f
 make clean      # docker compose down --remove-orphans -v
 make process    # docker compose run --rm opencode-issue-processor
 make plan       # docker compose run --rm opencode-plan-issue
+make generic    # docker compose run --rm opencode-generic-worker
 ```
 
 ## Usage
@@ -57,7 +59,25 @@ ISSUE_URL=https://github.com/tbrandenburg/pyrag/issues/30 \
   docker compose run --rm opencode-plan-issue
 ```
 
-All runner containers pass `GH_TOKEN` from the host environment as-is — it never enters context.
+### Generic worker (one-shot, clone + exec)
+
+```bash
+# Mount a local script and execute it in the cloned repo:
+docker compose run --rm opencode-generic-worker \
+  -e REPO_URL=https://github.com/tbrandenburg/pyrag.git \
+  -e ISSUE=42 \
+  -v ./workflows/issue-resolution/.opencode:/opencode-config:ro \
+  -v ./my-script.sh:/script.sh:ro \
+  /script.sh
+
+# Pass an inline command instead:
+docker compose run --rm opencode-generic-worker \
+  -e REPO_URL=https://github.com/tbrandenburg/pyrag.git \
+  -e ISSUE=42 \
+  sh -c 'echo "Issue: $ISSUE" && cat README.md'
+```
+
+All runner containers pass `GH_TOKEN`, `ISSUE_URL`, `REPO_URL`, and `ISSUE` from the host environment as-is — they never enter context.
 
 ## Network
 
@@ -72,7 +92,7 @@ All runner containers pass `GH_TOKEN` from the host environment as-is — it nev
 - Only `opencode serve` and `opencode web` support `--port`, `--hostname`, `--cors`, `--mdns`
 - `opencode acp` communicates over stdio using JSON-RPC 2.0 — socat bridges it to TCP for container access
 - `opencode run` is used for ephemeral batch/plan containers — it needs a git repo and provider credentials in the environment
-- Never hardcode `GH_TOKEN`, `OPENCODE_API_KEY`, or any credential in Dockerfiles or scripts
+- Never hardcode `GH_TOKEN` or any credential in Dockerfiles or scripts
 - All `openmode-*` containers use `node:22-slim` base image with `opencode-ai` npm package and `gh` CLI installed via tarball from `cli/cli` releases
 - For token safety: `$(gh auth token)` is interpolated by the calling shell, never read into agent context
 - Container `profiles: [manual]` services must be run with `docker compose run --rm` — they are not started by `docker compose up`

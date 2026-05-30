@@ -17,4 +17,5 @@ RUN git config --global user.email "dev@opencode.local" && \
 ENV OPENCODE_SERVER_PASSWORD=changeme
 EXPOSE 4096
 
-CMD ["opencode", "serve", "--port", "4096", "--hostname", "0.0.0.0"]
+ENTRYPOINT ["opencode", "serve"]
+CMD ["--port", "4096", "--hostname", "0.0.0.0"]

@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPOS=(
-  "tbrandenburg/made"
-  "tbrandenburg/pyrag"
-)
+if [ -z "${GH_TOKEN:-}" ]; then
+  echo "FATAL: GH_TOKEN is required. Run with: GH_TOKEN=\$(gh auth token) $0"
+  exit 1
+fi
+
+REPOS_ENV="${REPOS:-}"
+if [ -n "$REPOS_ENV" ]; then
+  IFS=',' read -r -a REPOS <<< "$REPOS_ENV"
+else
+  REPOS=(
+    "tbrandenburg/made"
+    "tbrandenburg/pyrag"
+  )
+fi
 
 for REPO in "${REPOS[@]}"; do
   gh issue list \

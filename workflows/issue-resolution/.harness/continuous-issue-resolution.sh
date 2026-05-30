@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ -z "${GH_TOKEN:-}" ]; then
+  echo "FATAL: GH_TOKEN is required. Run with: GH_TOKEN=\$(gh auth token) $0"
+  exit 1
+fi
+
 SCRIPT_NAME="continuous-issue-resolution.sh"
 WORKFLOW_NAME="${SCRIPT_NAME%.sh}"
 WORKFLOW_SLUG=$(printf '%s' "$WORKFLOW_NAME" \

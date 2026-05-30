@@ -17,7 +17,7 @@ That's it. Three commands, zero edits, and you have a running OpenCode server.
 ## Containers
 
 | Container | Dockerfile | Mode | Port | Profiles | Volumes | Purpose |
-|---|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | `opencode-serve` | `serve.dockerfile` | `serve` | 4096 | — | data, config | Headless HTTP server: web UI + REST API + OpenAPI doc. Starts with an initialized git project. |
 | `opencode-web` | `web.dockerfile` | `web` | 4098 | — | data, config | Same as `serve` but uses `opencode web` (auto-instantiates a project on first load). |
 | `opencode-acp` | `acp.dockerfile` | `acp` | 4097 | — | — | ACP (Agent Client Protocol) JSON-RPC server over stdio, bridged to TCP via `socat`. For ACP-compatible clients (Cline, continue.dev). |
@@ -152,7 +152,7 @@ All containers use `node:22-slim` with:
 Docker Compose creates a default bridge network (`opencode-container_default`). All containers within `docker-compose.yml` are on this network and can reach each other by service name (e.g., `http://opencode-serve:4096` from another container).
 
 | Container | Host port | Container port | Protocol | Network | Auth |
-|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|
 | `opencode-serve` | 4096 | 4096 | HTTP | bridge (default) | Basic auth via `OPENCODE_SERVER_PASSWORD` |
 | `opencode-web` | 4098 | 4098 | HTTP | bridge (default) | Basic auth via `OPENCODE_SERVER_PASSWORD` |
 | `opencode-acp` | 4097 | 4097 | TCP (JSON-RPC) | bridge (default) | None (stdio → TCP via socat) |
@@ -291,7 +291,7 @@ make verify-quickstart  # Full quickstart verification (build → serve → curl
 The test suite (`tests/`) exercises:
 
 | Test file | What it validates |
-|---|---|---|
+|---|---|
 | `test-serve.sh` | `opencode-serve --help` returns help text; health-check endpoint returns `{"healthy":true}` |
 | `test-web.sh` | `opencode-web --help` returns help text; health-check endpoint returns `{"healthy":true}` |
 | `test-acp.sh` | socat binary is present, opencode binary is present, TCP listener on port 4097 is reachable |

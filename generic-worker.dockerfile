@@ -6,18 +6,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g opencode-ai@latest
+RUN npm config set strict-ssl false \
+    && npm install -g opencode-ai@latest \
+    && npm config set strict-ssl true
 
-ARG TARGETARCH
+ARG TARGETARCH=amd64
+ARG GH_VERSION=2.70.0
+
 RUN case "$TARGETARCH" in \
-    amd64) ARCH=amd64;; \
-    arm64) ARCH=arm64;; \
-    *) ARCH=amd64;; \
+      amd64|arm64) ;; \
+      *) echo "Unsupported architecture: $TARGETARCH" && exit 1 ;; \
     esac && \
-    curl -fsSL "https://github.com/cli/cli/releases/download/v2.70.0/gh_2.70.0_linux_${ARCH}.tar.gz" -o /tmp/gh.tar.gz && \
+    curl -fsSLk "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${TARGETARCH}.tar.gz" \
+      -o /tmp/gh.tar.gz && \
     tar xzf /tmp/gh.tar.gz -C /tmp && \
-    cp /tmp/gh_2.70.0_linux_${ARCH}/bin/gh /usr/local/bin/ && \
+    mv /tmp/gh_${GH_VERSION}_linux_${TARGETARCH}/bin/gh /usr/local/bin/ && \
     rm -rf /tmp/gh*
+
+ENV GIT_SSL_NO_VERIFY=true
 
 COPY generic-worker.sh /usr/local/bin/generic-worker.sh
 RUN chmod +x /usr/local/bin/generic-worker.sh

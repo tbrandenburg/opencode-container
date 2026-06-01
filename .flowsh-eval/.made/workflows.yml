@@ -1,0 +1,58 @@
+workflows:
+  - id: wf_hello_bash
+    name: Hello Bash
+    steps:
+      - type: bash
+        name: Identify repository
+        run: |
+          pwd
+          git remote get-url origin
+          git status --short
+
+  - id: wf_vars_readonly
+    name: Vars Readonly
+    steps:
+      - type: vars
+        name: Collect repo facts
+        values:
+          CURRENT_BRANCH: git branch --show-current
+          FILE_COUNT: find . -type f -not -path './.git/*' | wc -l
+          README_TITLE: sed -n '1p' README.md
+      - type: bash
+        name: Print repo facts
+        run: |
+          printf 'branch=%s\n' "$CURRENT_BRANCH"
+          printf 'files=%s\n' "$FILE_COUNT"
+          printf 'readme=%s\n' "$README_TITLE"
+
+  - id: wf_agent_dry_run
+    name: Agent Dry Run
+    steps:
+      - type: agent
+        name: Ask default agent dry run only
+        prompt: |
+          Say one short sentence about this repository. Do not modify files.
+
+  - id: wf_agent_real
+    name: Agent Real
+    steps:
+      - type: agent
+        name: Ask custom test agent
+        agent: test
+        prompt: |
+          What is your name? Reply in under 20 words and do not modify files.
+
+  - id: wf_vars_agent_expand
+    name: Vars Agent Expand
+    steps:
+      - type: vars
+        name: Capture README heading
+        values:
+          README_HEADING: sed -n '1p' README.md
+      - type: agent
+        name: Ask custom test agent with vars
+        agent: test
+        expandPrompt: true
+        prompt: |
+          The README heading is: ${README_HEADING}
+          Reply with your agent name and the heading. Do not modify files.

@@ -1,0 +1,11 @@
+FROM node:22-slim
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git ca-certificates \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install -g opencode-ai@latest
+
+COPY generic-worker.sh /usr/local/bin/generic-worker.sh
+RUN chmod 755 /usr/local/bin/generic-worker.sh
+
+ENTRYPOINT ["/usr/local/bin/generic-worker.sh"]

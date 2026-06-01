@@ -1,0 +1,39 @@
+workflows:
+  - id: wf_clean_bash
+    name: Clean Bash
+    steps:
+      - type: bash
+        name: Inspect clone
+        run: |
+          pwd
+          git remote get-url origin
+          sed -n '1p' README.md
+
+  - id: wf_clean_vars
+    name: Clean Vars
+    steps:
+      - type: vars
+        name: Gather facts
+        values:
+          BRANCH_NAME: git branch --show-current
+          README_HEADING: sed -n '1p' README.md
+      - type: bash
+        name: Print facts
+        run: |
+          printf 'branch=%s\n' "$BRANCH_NAME"
+          printf 'heading=%s\n' "$README_HEADING"
+
+  - id: wf_clean_agent
+    name: Clean Agent
+    steps:
+      - type: vars
+        name: Read heading
+        values:
+          README_HEADING: sed -n '1p' README.md
+      - type: agent
+        name: Ask custom agent
+        agent: test
+        expandPrompt: true
+        prompt: |
+          Your name is test. The repository heading is ${README_HEADING}.
+          Reply in under 20 words. Do not modify files.

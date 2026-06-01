@@ -1,0 +1,12 @@
+services:
+  generic-worker:
+    build:
+      context: .
+      dockerfile: generic-worker.dockerfile
+    environment:
+      - REPO_URL
+      - WORK_DIR
+      - OPENCODE_CONFIG_DIR
+      - OPENCODE_GLOBAL_DIR
+    profiles:
+      - manual
